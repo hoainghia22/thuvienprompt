@@ -35,6 +35,10 @@
   --shadow-primary-md: 0 7px 18px rgba(229, 184, 75, 0.25);
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -136,7 +140,7 @@ header p {
 
 main {
   width: 100%;
-  max-width: 800px;
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -197,7 +201,7 @@ main {
 
 .prompt-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 1.5rem;
 }
 
@@ -265,10 +269,10 @@ main {
   color: var(--color-text-on-primary);
 }
 
-/* Skeleton Loader Styles */
-@keyframes pulse {
-  50% {
-    opacity: 0.6;
+/* Skeleton Loader Styles with Shimmer Effect */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
   }
 }
 
@@ -280,19 +284,40 @@ main {
   flex-direction: column;
 }
 
+.skeleton-card .skeleton-image,
+.skeleton-card .skeleton-button {
+  background-color: var(--color-skeleton);
+  position: relative; /* Needed for the pseudo-element */
+  overflow: hidden;   /* Keeps the shimmer inside the element */
+}
+
+.skeleton-card .skeleton-image::after,
+.skeleton-card .skeleton-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 20%,
+    rgba(255, 255, 255, 0.2) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 1.5s infinite;
+}
+
 .skeleton-card .skeleton-image {
   width: 100%;
   aspect-ratio: 2 / 3;
-  background-color: var(--color-skeleton);
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .skeleton-card .skeleton-button {
   width: 100%;
-  height: 48px; /* Matches the new button height */
-  background-color: var(--color-skeleton);
-  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  animation-delay: 0.2s;
+  height: 48px; /* Matches the button height */
 }
 
 .error, .empty-state, .end-of-results {
@@ -306,6 +331,39 @@ main {
 .end-of-results {
   padding: 2rem 0;
   font-size: 1rem;
+}
+
+.load-more-container {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.load-more-button {
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border: none;
+  padding: 0.8rem 2.5rem;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-weight: var(--font-weight-bold);
+  font-size: 1rem;
+  box-shadow: var(--shadow-primary-sm);
+}
+
+.load-more-button:hover {
+  background-color: var(--color-primary-dark);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-primary-md);
+}
+
+.load-more-button:disabled {
+  background-color: var(--color-surface-hover);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 .site-footer {
@@ -325,15 +383,15 @@ main {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 800px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 1rem;
   font-size: 0.9rem;
-  color: #888;
+  color: var(--color-text-secondary);
 }
 
 .footer-link {
-  color: #bbb;
+  color: var(--color-text-primary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createRoot } from 'react-dom/client';
 import PocketBase from 'pocketbase';
 import './index.css';
@@ -9,6 +9,22 @@ const PROMPTS_PER_PAGE = 10;
 
 const pb = new PocketBase(POCKETBASE_URL);
 
+// --- UTILITY FUNCTIONS ---
+const throttle = (func: (...args: any[]) => void, delay: number) => {
+  let inProgress = false;
+  return (...args: any[]) => {
+    if (inProgress) {
+      return;
+    }
+    inProgress = true;
+    func(...args);
+    setTimeout(() => {
+      inProgress = false;
+    }, delay);
+  };
+};
+
+// --- INTERFACES ---
 interface PromptRecord {
   id: string;
   collectionId: string;
@@ -18,7 +34,8 @@ interface PromptRecord {
   publishUrl: string;
 }
 
-const PromptCard: React.FC<{ record: PromptRecord }> = ({ record }) => {
+// --- COMPONENTS ---
+const PromptCard: React.FC<{ record: PromptRecord }> = React.memo(({ record }) => {
   const [copied, setCopied] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const timeoutRef = useRef<number | null>(null);
@@ -59,7 +76,7 @@ const PromptCard: React.FC<{ record: PromptRecord }> = ({ record }) => {
       </div>
     </div>
   );
-};
+});
 
 const SkeletonCard = () => (
   <div className="skeleton-card">
@@ -75,77 +92,110 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  // FIX: Add a state to trigger refetching for real-time updates.
+  const [refetchTrigger, setRefetchTrigger] = useState(0);
 
-  const fetchPrompts = useCallback(async (pageToFetch: number, category: string) => {
-    setIsLoading(true);
-    setError(null);
-    let requestAborted = false;
-    try {
-      const filter = category ? `category = "${category}"` : '';
-      const result = await pb
-        .collection('prompt')
-        .getList<PromptRecord>(pageToFetch, PROMPTS_PER_PAGE, {
-          filter: filter,
-          sort: '-created',
-        });
-      setPrompts(prev => (pageToFetch === 1 ? result.items : [...prev, ...result.items]));
-      setHasMore(result.page < result.totalPages);
-    } catch (err: any) {
-      if (err && err.isAbort) {
-        requestAborted = true;
-      } else {
-        setError('Không thể tải dữ liệu. Vui lòng thử lại sau.');
-        console.error(err);
-      }
-    } finally {
-      if (!requestAborted) {
-        setIsLoading(false);
-      }
-    }
-  }, []);
-
+  // Data fetching logic, triggered by page or category changes
   useEffect(() => {
-    fetchPrompts(page, activeCategory);
-  }, [page, activeCategory, fetchPrompts]);
+    // Abort previous request to prevent race conditions
+    abortControllerRef.current?.abort();
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (isLoading || !hasMore) return;
-      
-      const isAtBottom = window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 300;
-      
-      if (isAtBottom) {
-        setPage(prevPage => prevPage + 1);
+    const fetchPrompts = async () => {
+      // The loading state is now set in the event handler for a more responsive UI
+      try {
+        const filter = activeCategory ? `category ~ "%${activeCategory}%"` : '';
+        const result = await pb
+          .collection('prompt')
+          .getList<PromptRecord>(page, PROMPTS_PER_PAGE, {
+            filter: filter,
+            sort: '-created',
+            signal: controller.signal,
+          });
+        
+        // Only update state if the request was not aborted
+        if (!controller.signal.aborted) {
+          setPrompts(prev => (page === 1 ? result.items : [...prev, ...result.items]));
+          setHasMore(result.page < result.totalPages);
+        }
+      } catch (err: any) {
+        if (err.name !== 'AbortError' && !err.isAbort) {
+          let errorMessage = 'Không thể tải dữ liệu. Vui lòng thử lại sau.';
+          if (err.status === 0) {
+            errorMessage = 'Lỗi mạng. Vui lòng kiểm tra kết nối internet của bạn.';
+          } else if (err.data?.message) {
+            errorMessage = `Đã xảy ra lỗi: ${err.data.message}`;
+          }
+          setError(errorMessage);
+          setHasMore(false);
+        }
+      } finally {
+        // Only stop loading if this request is the latest one
+        if (!controller.signal.aborted) {
+          setIsLoading(false);
+        }
       }
     };
+
+    fetchPrompts();
+
+    return () => {
+      controller.abort();
+    };
+    // FIX: Add refetchTrigger to dependency array to allow manual refetching.
+  }, [page, activeCategory, refetchTrigger]);
+
+  // Infinite scroll logic
+  const handleScroll = useCallback(() => {
+    if (isLoading || !hasMore) return;
     
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const isAtBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 300;
+    
+    if (isAtBottom) {
+      setPage(prevPage => prevPage + 1);
+    }
   }, [isLoading, hasMore]);
 
+  const throttledScrollHandler = useMemo(() => throttle(handleScroll, 200), [handleScroll]);
+
+  useEffect(() => {
+    window.addEventListener('scroll', throttledScrollHandler);
+    return () => window.removeEventListener('scroll', throttledScrollHandler);
+  }, [throttledScrollHandler]);
+
+  // Real-time subscription - runs only once
   useEffect(() => {
     const promise = pb.collection('prompt').subscribe('*', () => {
-      setPrompts([]);
-      setHasMore(true);
       if (page === 1) {
-        fetchPrompts(1, activeCategory);
+         // If already on page 1, trigger a refetch for the current category
+        // FIX: The spread operator cannot be used on a string. Use a dedicated state to trigger the effect.
+        setRefetchTrigger(t => t + 1); // Force re-trigger of useEffect
       } else {
+        // Otherwise, reset to page 1 to show the newest data
         setPage(1);
       }
+      setHasMore(true);
     });
 
     return () => {
       promise.then((unsubscribe) => unsubscribe());
     };
-  }, [activeCategory, page, fetchPrompts]);
+  }, [page]); // Depend on page to correctly handle re-triggering
 
-  const handleSetCategory = (category: string) => {
+  const handleSetCategory = useCallback((category: string) => {
     if (category === activeCategory) return;
-    setPrompts([]);
-    setHasMore(true);
-    setPage(1);
+    
+    // Set UI state synchronously for immediate feedback
     setActiveCategory(category);
-  };
+    setPage(1);
+    setPrompts([]); 
+    setHasMore(true); 
+    setIsLoading(true); 
+    setError(null);
+    window.scrollTo(0, 0);
+  }, [activeCategory]);
 
   return (
     <div className="container">
@@ -186,6 +236,18 @@ const App = () => {
             ))}
         </div>
 
+        {!isLoading && hasMore && prompts.length > 0 && (
+          <div className="load-more-container">
+            <button 
+              onClick={() => setPage(p => p + 1)} 
+              className="load-more-button"
+              disabled={isLoading}
+            >
+              {isLoading ? 'ĐANG TẢI...' : 'TẢI THÊM'}
+            </button>
+          </div>
+        )}
+
         {!isLoading && prompts.length === 0 && !error && (
           <div className="empty-state">
             <p>Không tìm thấy prompt nào cho danh mục này.</p>
@@ -203,7 +265,7 @@ const App = () => {
           <span>
             Phát triển bởi{' '}
             <a
-              href="#author-link"
+              href="https://github.com/hoainghia22"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-link"
@@ -213,7 +275,7 @@ const App = () => {
             | © {new Date().getFullYear()}
           </span>
           <a
-            href="#feedback-link"
+            href="mailto:feedback.cafenho@gmail.com?subject=Feedback for Thư Viện Prompt"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-button"
