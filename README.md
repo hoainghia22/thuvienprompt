@@ -1,92 +1,113 @@
-# Thư Viện Prompt (Prompt Library)
+# Thư Viện Prompt
 
-Welcome to the Prompt Library! This is a modern, responsive web application built with React and Vite, designed to explore and copy image generation prompts. It connects to a PocketBase backend in real-time to display a curated gallery of prompts.
+Chào mừng bạn đến với Thư Viện Prompt! Đây là một ứng dụng web hiện đại, được xây dựng bằng React và Vite, dùng để khám phá và sao chép các prompt tạo hình ảnh. Ứng dụng kết nối với PocketBase backend để hiển thị một bộ sưu tập các prompt được tuyển chọn theo thời gian thực.
 
-![Screenshot of the Prompt Library application](./screenshot.png) <!-- It's recommended to add a screenshot of your app named screenshot.png to the root directory -->
+![Ảnh chụp màn hình ứng dụng Thư Viện Prompt](./screenshot.png) <!-- Nên thêm ảnh chụp màn hình của ứng dụng với tên screenshot.png vào thư mục gốc -->
 
-## ✨ Features
+## ✨ Tính Năng Nổi Bật
 
-- **Real-time Data:** Subscribes to a PocketBase collection to reflect data changes instantly without needing a refresh.
-- **Dynamic Filtering:** Filter prompts by categories (Nam, Nữ, Couple, etc.).
-- **Pagination:** Efficiently browse through a large number of prompts with customizable page sizes.
-- **Responsive Design:** A sleek, mobile-first interface that looks great on all devices, from phones to desktops.
-- **Modern UI/UX:** Features a dark theme, smooth animations, skeleton loaders for a better loading experience, and an interactive hover-to-reveal copy button.
-- **Copy to Clipboard:** Easily copy any prompt with a single click.
-- **Containerized:** Ready for easy deployment with Docker and Docker Compose.
+- **Dữ liệu thời gian thực:** Tự động cập nhật dữ liệu từ PocketBase mà không cần tải lại trang.
+- **Lọc theo danh mục:** Dễ dàng lọc các prompt theo nhiều danh mục khác nhau (Nam, Nữ, Couple, v.v.).
+- **Phân trang thông minh:** Duyệt qua hàng trăm prompt một cách hiệu quả với tùy chọn số lượng hiển thị trên mỗi trang.
+- **Thiết kế Responsive:** Giao diện đẹp mắt và hoạt động mượt mà trên mọi thiết bị, từ điện thoại di động đến máy tính để bàn.
+- **Giao diện hiện đại (UI/UX):** Sử dụng dark theme, hiệu ứng chuyển động mượt mà, skeleton loader để cải thiện trải nghiệm tải trang và nút sao chép tương tác.
+- **Tối ưu cho Production:** Được cấu hình sẵn để triển khai như một ứng dụng Node.js độc lập, tối ưu hóa qua Docker.
 
-## 🛠️ Tech Stack
+## 🛠️ Công Nghệ Sử Dụng
 
-- **Frontend:** [React](https://reactjs.org/) with [Vite](https://vitejs.dev/)
-- **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Backend Service:** [PocketBase](https://pocketbase.io/)
-- **Styling:** CSS with modern features (variables, animations, media queries)
-- **Deployment:** [Docker](https://www.docker.com/) & [Caddy Web Server](https://caddyserver.com/)
+- **Frontend:** [React](https://reactjs.org/) với [Vite](https://vitejs.dev/)
+- **Ngôn ngữ:** [TypeScript](https://www.typescriptlang.org/)
+- **Dịch vụ Backend:** [PocketBase](https://pocketbase.io/)
+- **Styling:** CSS thuần với các tính năng hiện đại (biến, animations, media queries).
+- **Web Server (Production):** [Node.js](https://nodejs.org/) + [Express](https://expressjs.com/)
 
-## 🚀 Getting Started
+## 🚀 Hướng Dẫn Cài Đặt
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+Làm theo các bước dưới đây để cài đặt và chạy dự án trên máy của bạn.
 
-### Prerequisites
+### Yêu cầu
 
-- [Node.js](https://nodejs.org/) (version 18.x or higher recommended)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [Node.js](https://nodejs.org/) (phiên bản 18.x trở lên)
+- [npm](https://www.npmjs.com/) hoặc [yarn](https://yarnpkg.com/)
 
-### Local Development
+### Chạy trên máy cá nhân (Local Development)
 
-1.  **Clone the repository:**
+1.  **Clone repository về máy:**
     ```bash
-    git clone https://github.com/your-username/prompt-library.git
+    git clone https://github.com/hoainghia22/prompt-library.git
     cd prompt-library
     ```
 
-2.  **Install dependencies:**
+2.  **Cài đặt các gói phụ thuộc:**
     ```bash
     npm install
     ```
 
-3.  **Run the development server:**
+3.  **Khởi động server development:**
     ```bash
     npm run dev
     ```
-    The application will be available at `http://localhost:5173` (or another port if 5173 is in use). The server supports Hot Module Replacement (HMR) for a fast development experience.
+    Ứng dụng sẽ chạy tại địa chỉ `http://localhost:5173`. Server hỗ trợ Hot Module Replacement (HMR) giúp tăng tốc quá trình phát triển.
 
-## 🐳 Docker Deployment
+## 🐳 Triển Khai
 
-The project is fully configured to be built and deployed using Docker.
+Ứng dụng đã được tối ưu để triển khai như một ứng dụng Node.js.
 
-### Prerequisites
+### Chạy Production Build trên máy cá nhân
+
+Bạn có thể giả lập môi trường production ngay trên máy của mình.
+
+1.  **Build ứng dụng:**
+    Lệnh này sẽ biên dịch mã nguồn TypeScript và đóng gói tài nguyên vào thư mục `dist`.
+    ```bash
+    npm run build
+    ```
+
+2.  **Khởi động máy chủ production:**
+    Lệnh này sẽ chạy máy chủ Express (`server.js`) để phục vụ các tệp tĩnh từ thư mục `dist`.
+    ```bash
+    npm start
+    ```
+    Ứng dụng sẽ chạy tại địa chỉ `http://localhost:8080`.
+
+### Triển Khai với Docker
+
+Dự án sử dụng một **Dockerfile đa tầng (multi-stage build)** để tạo ra một image production nhỏ gọn và an toàn.
+
+-   **Giai đoạn 1 (Build):** Build ứng dụng React bằng Vite để tạo ra các tệp tĩnh.
+-   **Giai đoạn 2 (Production):** Tạo một image Node.js gọn nhẹ, chỉ sao chép các tệp đã build (`dist`), máy chủ Express (`server.js`), và các `dependencies` cần thiết để chạy ứng dụng.
+
+#### Yêu cầu
 
 - [Docker](https://www.docker.com/products/docker-desktop/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Running with Docker
+#### Chạy với Docker
 
-1.  **Build the Docker image:**
-    This command builds the multi-stage Docker image, which first builds the Vite project and then serves the static files using Caddy.
+1.  **Build Docker image:**
     ```bash
     docker-compose build
     ```
 
-2.  **Run the container:**
-    This command starts the container in detached mode.
+2.  **Chạy container:**
+    Lệnh này sẽ khởi động container ở chế độ detached mode.
     ```bash
     docker-compose up -d
     ```
+    Ứng dụng sẽ chạy tại địa chỉ **`http://localhost:8000`**.
 
-The application will now be running and accessible at **`http://localhost:8000`**.
+#### Dừng container
 
-### Stopping the container
-
-To stop the running container, use:
+Để dừng container đang chạy, sử dụng lệnh:
 ```bash
 docker-compose down
 ```
 
-## ⚙️ Configuration
+## ⚙️ Cấu Hình
 
-The PocketBase backend URL is configured in `src/index.tsx`. If you wish to connect to a different instance, you can change the following constant:
+URL của PocketBase backend được cấu hình trong file `src/index.tsx`. Nếu bạn muốn kết nối đến một instance khác, hãy thay đổi hằng số sau:
 
 ```typescript
 // src/index.tsx
-const POCKETBASE_URL = 'https://your-pocketbase-url.com';
+const POCKETBASE_URL = 'https://api.cafenho.site';
 ```

@@ -4,6 +4,7 @@
   --text-color: #e0e0e0;
   --primary-color: #e5b84b;
   --primary-color-darker: #c79f3c;
+  --primary-color-lighter: #f0d89f;
   --card-background: #1e1e1e;
   --border-color: #2c2c2c;
   --button-hover-bg: #333;
@@ -324,6 +325,17 @@ footer {
   color: #888;
 }
 
+.footer-link {
+  color: #bbb;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-link:hover {
+  color: var(--primary-color);
+  text-decoration: underline;
+}
+
 .footer-button {
   background-image: linear-gradient(45deg, var(--primary-color-darker), var(--primary-color));
   color: var(--background-color);
@@ -332,14 +344,17 @@ footer {
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
   box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-decoration: none;
+  text-align: center;
 }
 
 .footer-button:hover {
-  opacity: 0.9;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-  transform: translateY(-2px);
+  background-image: linear-gradient(45deg, var(--primary-color), var(--primary-color-lighter));
+  box-shadow: 0 7px 18px rgba(229, 184, 75, 0.25);
+  transform: translateY(-3px);
+  filter: brightness(1.1);
 }
 
 /* --- Media Queries for Responsiveness --- */

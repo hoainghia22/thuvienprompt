@@ -237,8 +237,26 @@ const App = () => {
         />
       </main>
       <footer>
-        <span>Phát triển bởi Hoài Nghĩa | © {new Date().getFullYear()}</span>
-        <button className="footer-button">Feedback</button>
+        <span>
+          Phát triển bởi{' '}
+          <a
+            href="#author-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="footer-link"
+          >
+            Hoài Nghĩa
+          </a>{' '}
+          | © {new Date().getFullYear()}
+        </span>
+        <a
+          href="#feedback-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="footer-button"
+        >
+          Feedback
+        </a>
       </footer>
     </div>
   );
