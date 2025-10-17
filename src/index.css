@@ -1,13 +1,38 @@
 :root {
-  --background-color: #121212;
-  --background-gradient-start: #1f1f1f;
-  --text-color: #e0e0e0;
-  --primary-color: #e5b84b;
-  --primary-color-darker: #c79f3c;
-  --primary-color-lighter: #f0d89f;
-  --card-background: #1e1e1e;
-  --border-color: #2c2c2c;
-  --button-hover-bg: #333;
+  /* COLORS */
+  --color-primary: #e5b84b;
+  --color-primary-dark: #c79f3c;
+  --color-primary-light: #f0d89f;
+  --color-background: #121212;
+  --color-background-gradient: #1f1f1f;
+  --color-surface: #1e1e1e; /* For cards, buttons, etc. */
+  --color-surface-hover: #333;
+  --color-text-primary: #e0e0e0;
+  --color-text-secondary: #a0a0a0;
+  --color-text-on-primary: #121212; /* Text on primary color background */
+  --color-border: #2c2c2c;
+  --color-skeleton: #2a2a2a;
+
+  /* TYPOGRAPHY */
+  --font-family-sans: 'Inter', sans-serif;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  /* SPACING & RADII */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-pill: 999px;
+  
+  /* TRANSITIONS & SHADOWS */
+  --transition-fast: 0.2s ease-in-out;
+  --transition-medium: 0.3s ease;
+  --transition-image: 0.4s ease-in-out;
+  --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.5);
+  --shadow-primary-sm: 0 0 15px rgba(229, 184, 75, 0.3);
+  --shadow-primary-md: 0 7px 18px rgba(229, 184, 75, 0.25);
 }
 
 @keyframes fadeIn {
@@ -39,10 +64,10 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
-  background-color: var(--background-color);
-  background-image: radial-gradient(circle at top, var(--background-gradient-start) 0%, var(--background-color) 100%);
-  color: var(--text-color);
+  font-family: var(--font-family-sans);
+  background-color: var(--color-background);
+  background-image: radial-gradient(circle at top, var(--color-background-gradient) 0%, var(--color-background) 100%);
+  color: var(--color-text-primary);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -71,16 +96,16 @@ header {
 
 header h1 {
   font-size: 3.5rem;
-  font-weight: 800;
+  font-weight: var(--font-weight-extrabold);
   margin-bottom: 0.5rem;
-  background: -webkit-linear-gradient(45deg, var(--primary-color), #f0d89f);
+  background: -webkit-linear-gradient(45deg, var(--color-primary), var(--color-primary-light));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 header p {
   font-size: 1.2rem;
-  color: #a0a0a0;
+  color: var(--color-text-secondary);
   margin-bottom: 2rem;
   max-width: 600px;
   margin-left: auto;
@@ -89,8 +114,8 @@ header p {
 
 .instructions {
   background-color: rgba(30, 30, 30, 0.5);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: 1.5rem 2rem;
   max-width: 800px;
   margin: 0 auto;
@@ -98,25 +123,25 @@ header p {
 }
 
 .instructions h3 {
-  color: var(--primary-color);
+  color: var(--color-primary);
   margin-bottom: 0.5rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .instructions p {
-  color: #c0c0c0;
+  color: #c0c0c0; /* Kept for slight differentiation from primary text */
   font-size: 1rem;
   margin-bottom: 0;
 }
 
 .instructions a {
-  color: var(--primary-color);
+  color: var(--color-primary);
   text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
 }
 .instructions a:hover {
-  color: var(--primary-color-darker);
+  color: var(--color-primary-dark);
   text-decoration: underline;
 }
 
@@ -126,33 +151,33 @@ header p {
   gap: 0.75rem;
   justify-content: center;
   padding: 0.5rem;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 
 .filters button {
-  background-color: var(--card-background);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   padding: 0.6rem 1.25rem;
-  border-radius: 999px; /* Pill shape */
+  border-radius: var(--radius-pill);
   cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  font-weight: 500;
+  transition: all var(--transition-fast);
+  font-weight: var(--font-weight-medium);
   font-size: 0.95rem;
 }
 
 .filters button:hover {
-  background-color: var(--button-hover-bg);
+  background-color: var(--color-surface-hover);
   border-color: #555;
   transform: translateY(-2px);
 }
 
 .filters button.active {
-  background-color: var(--primary-color);
-  color: var(--background-color);
-  border-color: var(--primary-color);
-  font-weight: 700;
-  box-shadow: 0 0 15px rgba(229, 184, 75, 0.3);
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
+  border-color: var(--color-primary);
+  font-weight: var(--font-weight-bold);
+  box-shadow: var(--shadow-primary-sm);
 }
 
 .filters button:active,
@@ -173,7 +198,7 @@ header p {
 }
 
 .pagination-info {
-  color: #a0a0a0;
+  color: var(--color-text-secondary);
 }
 
 .pagination-actions {
@@ -183,20 +208,20 @@ header p {
 }
 
 .pagination-actions button {
-  background-color: var(--card-background);
-  color: var(--text-color);
-  border: 1px solid var(--border-color);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
   width: 40px;
   height: 40px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
   display: grid;
   place-items: center;
 }
 
 .pagination-actions button:hover:not(:disabled) {
-  background-color: var(--button-hover-bg);
+  background-color: var(--color-surface-hover);
   border-color: #555;
 }
 
@@ -206,8 +231,8 @@ header p {
 }
 
 .pagination-actions button.active {
-  background-color: #333;
-  font-weight: bold;
+  background-color: var(--color-surface-hover);
+  font-weight: var(--font-weight-bold);
   border-color: #666;
 }
 
@@ -219,15 +244,15 @@ header p {
 
 .prompt-card {
   position: relative;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium);
   animation: cardEnter 0.5s ease-out forwards;
 }
 
 .prompt-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-md);
 }
 
 .prompt-card img {
@@ -235,6 +260,12 @@ header p {
   aspect-ratio: 2 / 3;
   object-fit: cover;
   display: block;
+  opacity: 0;
+  transition: opacity var(--transition-image);
+}
+
+.prompt-card img.loaded {
+  opacity: 1;
 }
 
 .card-overlay {
@@ -244,7 +275,7 @@ header p {
   align-items: flex-end;
   background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%);
   opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+  transition: opacity var(--transition-medium);
 }
 
 .prompt-card:hover .card-overlay {
@@ -257,13 +288,13 @@ header p {
   background: rgba(18, 18, 18, 0.7);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: var(--text-color);
+  color: var(--color-text-primary);
   border: none;
   cursor: pointer;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   font-size: 0.9rem;
   transform: translateY(100%);
-  transition: transform 0.3s ease;
+  transition: transform var(--transition-medium);
 }
 
 .prompt-card:hover button {
@@ -271,8 +302,8 @@ header p {
 }
 
 .prompt-card button.copied {
-  background-color: var(--primary-color);
-  color: var(--background-color);
+  background-color: var(--color-primary);
+  color: var(--color-text-on-primary);
 }
 
 /* Skeleton Loader Styles */
@@ -283,8 +314,8 @@ header p {
 }
 
 .skeleton-card {
-  background-color: var(--card-background);
-  border-radius: 12px;
+  background-color: var(--color-surface);
+  border-radius: var(--radius-md);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -293,14 +324,14 @@ header p {
 .skeleton-card .skeleton-image {
   width: 100%;
   aspect-ratio: 2 / 3;
-  background-color: #2a2a2a;
+  background-color: var(--color-skeleton);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .skeleton-card .skeleton-button {
   width: 100%;
   height: 48px; /* Matches the new button height */
-  background-color: #2a2a2a;
+  background-color: var(--color-skeleton);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   animation-delay: 0.2s;
 }
@@ -309,7 +340,7 @@ header p {
   text-align: center;
   padding: 4rem;
   font-size: 1.2rem;
-  color: #a0a0a0;
+  color: var(--color-text-secondary);
   grid-column: 1 / -1; /* Span full width */
 }
 
@@ -320,7 +351,7 @@ footer {
   align-items: center;
   margin-top: auto;
   padding-top: 2rem;
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--color-border);
   font-size: 0.9rem;
   color: #888;
 }
@@ -328,31 +359,31 @@ footer {
 .footer-link {
   color: #bbb;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color var(--transition-fast);
 }
 
 .footer-link:hover {
-  color: var(--primary-color);
+  color: var(--color-primary);
   text-decoration: underline;
 }
 
 .footer-button {
-  background-image: linear-gradient(45deg, var(--primary-color-darker), var(--primary-color));
-  color: var(--background-color);
+  background-image: linear-gradient(45deg, var(--color-primary-dark), var(--color-primary));
+  color: var(--color-text-on-primary);
   border: none;
   padding: 0.7rem 1.4rem;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-sm);
   text-decoration: none;
   text-align: center;
 }
 
 .footer-button:hover {
-  background-image: linear-gradient(45deg, var(--primary-color), var(--primary-color-lighter));
-  box-shadow: 0 7px 18px rgba(229, 184, 75, 0.25);
+  background-image: linear-gradient(45deg, var(--color-primary), var(--color-primary-light));
+  box-shadow: var(--shadow-primary-md);
   transform: translateY(-3px);
   filter: brightness(1.1);
 }
@@ -410,7 +441,7 @@ footer {
 
   .instructions {
     padding: 1rem;
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
   }
 
   .instructions p {

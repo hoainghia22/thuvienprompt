@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import PocketBase from 'pocketbase';
+import './index.css';
 
 const POCKETBASE_URL = 'https://api.cafenho.site';
 const CATEGORIES = ["NAM", "NỮ", "COUPLE", "BÉ TRAI", "BÉ GÁI", "MẸ BẦU", "PROMPT KHÁC"];
@@ -17,10 +18,9 @@ interface PromptRecord {
   publishUrl: string;
 }
 
-// Fix: Explicitly type PromptCard as a React.FC (FunctionComponent).
-// This helps TypeScript correctly handle special React props like 'key' and avoids type errors when using the component in a list.
 const PromptCard: React.FC<{ record: PromptRecord }> = ({ record }) => {
   const [copied, setCopied] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const timeoutRef = useRef<number | null>(null);
 
   const handleCopy = () => {
@@ -44,9 +44,16 @@ const PromptCard: React.FC<{ record: PromptRecord }> = ({ record }) => {
 
   return (
     <div className="prompt-card">
-      <img src={record.publishUrl} alt={`Prompt image for ${record.id}`} loading="lazy" />
+      <img
+        src={record.publishUrl}
+        alt={`Prompt image for ${record.id}`}
+        loading="lazy"
+        decoding="async"
+        onLoad={() => setImageLoaded(true)}
+        className={imageLoaded ? 'loaded' : ''}
+      />
       <div className="card-overlay">
-        <button onClick={handleCopy} className={copied ? 'copied' : ''}>
+        <button onClick={handleCopy} className={copied ? 'copied' : ''} aria-live="polite">
           {copied ? 'ĐÃ SAO CHÉP!' : 'SAO CHÉP PROMPT'}
         </button>
       </div>
@@ -91,14 +98,16 @@ const PaginationControls = ({
             key={size}
             onClick={() => setPerPage(size)}
             className={perPage === size ? 'active' : ''}
+            aria-label={`Hiển thị ${size} prompt mỗi trang`}
+            aria-pressed={perPage === size}
           >
             {size}
           </button>
         ))}
-        <button onClick={() => setPage(page - 1)} disabled={page <= 1}>
+        <button onClick={() => setPage(page - 1)} disabled={page <= 1} aria-label="Trang trước">
           &lt;
         </button>
-        <button onClick={() => setPage(page + 1)} disabled={page >= totalPages}>
+        <button onClick={() => setPage(page + 1)} disabled={page >= totalPages} aria-label="Trang tiếp theo">
           &gt;
         </button>
       </div>
@@ -180,15 +189,17 @@ const App = () => {
         <div className="instructions">
           <h3>HƯỚNG DẪN</h3>
           <p>
-            Sao chép prompt sau đó vào Gemini <a href="https://ai.studio/apps/drive/1RC8KRvWHTpLpzRA5ol0pQJXEmgqZNBJW" target="_blank" rel="noopener noreferrer">tại đây</a>, chọn tạo hình ảnh tự do, upload ảnh mặt cá nhân và dán prompt để tạo ảnh.
+            Sao chép prompt, mở Gemini <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">tại đây</a>, sau đó tải ảnh của bạn lên và dán prompt để tạo ảnh.
           </p>
         </div>
       </header>
       <main>
-        <div className="filters">
+        <div className="filters" role="tablist" aria-label="Lọc theo danh mục">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}
+              role="tab"
+              aria-selected={activeCategory === cat}
               onClick={() => handleSetCategory(cat)}
               className={activeCategory === cat ? 'active' : ''}
             >
@@ -205,16 +216,16 @@ const App = () => {
           setPerPage={handleSetPerPage}
         />
         {loading && (
-          <div className="prompt-gallery">
+          <div className="prompt-gallery" role="tabpanel">
             {Array.from({ length: perPage }).map((_, index) => (
               <SkeletonCard key={index} />
             ))}
           </div>
         )}
-        {error && <div className="error">{error}</div>}
+        {error && <div className="error" role="alert">{error}</div>}
         {!loading && !error && (
           <>
-            <div className="prompt-gallery">
+            <div className="prompt-gallery" role="tabpanel">
               {prompts.map((p) => (
                 <PromptCard key={p.id} record={p} />
               ))}
