@@ -1,1 +1,429 @@
-full contents of src/index.css
+:root {
+  --background-color: #121212;
+  --background-gradient-start: #1f1f1f;
+  --text-color: #e0e0e0;
+  --primary-color: #e5b84b;
+  --primary-color-darker: #c79f3c;
+  --card-background: #1e1e1e;
+  --border-color: #2c2c2c;
+  --button-hover-bg: #333;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-color);
+  background-image: radial-gradient(circle at top, var(--background-gradient-start) 0%, var(--background-color) 100%);
+  color: var(--text-color);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem 1rem;
+  min-height: 100vh;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.container {
+  width: 100%;
+  max-width: 1600px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+header {
+  text-align: center;
+}
+
+header h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: -webkit-linear-gradient(45deg, var(--primary-color), #f0d89f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+header p {
+  font-size: 1.2rem;
+  color: #a0a0a0;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.instructions {
+  background-color: rgba(30, 30, 30, 0.5);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.5rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.instructions h3 {
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.instructions p {
+  color: #c0c0c0;
+  font-size: 1rem;
+  margin-bottom: 0;
+}
+
+.instructions a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.instructions a:hover {
+  color: var(--primary-color-darker);
+  text-decoration: underline;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.filters button {
+  background-color: var(--card-background);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 0.6rem 1.25rem;
+  border-radius: 999px; /* Pill shape */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.filters button:hover {
+  background-color: var(--button-hover-bg);
+  border-color: #555;
+  transform: translateY(-2px);
+}
+
+.filters button.active {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  border-color: var(--primary-color);
+  font-weight: 700;
+  box-shadow: 0 0 15px rgba(229, 184, 75, 0.3);
+}
+
+.filters button:active,
+.pagination-actions button:active,
+.footer-button:active {
+    transform: scale(0.97);
+}
+
+
+.pagination-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.9rem;
+  padding: 0 0.5rem;
+}
+
+.pagination-info {
+  color: #a0a0a0;
+}
+
+.pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pagination-actions button {
+  background-color: var(--card-background);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: grid;
+  place-items: center;
+}
+
+.pagination-actions button:hover:not(:disabled) {
+  background-color: var(--button-hover-bg);
+  border-color: #555;
+}
+
+.pagination-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-actions button.active {
+  background-color: #333;
+  font-weight: bold;
+  border-color: #666;
+}
+
+.prompt-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.75rem;
+}
+
+.prompt-card {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: cardEnter 0.5s ease-out forwards;
+}
+
+.prompt-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+}
+
+.prompt-card img {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  display: block;
+}
+
+.card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.prompt-card:hover .card-overlay {
+  opacity: 1;
+}
+
+.prompt-card button {
+  width: 100%;
+  padding: 0.85rem;
+  background: rgba(18, 18, 18, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--text-color);
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.prompt-card:hover button {
+  transform: translateY(0);
+}
+
+.prompt-card button.copied {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+}
+
+/* Skeleton Loader Styles */
+@keyframes pulse {
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.skeleton-card {
+  background-color: var(--card-background);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.skeleton-card .skeleton-image {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background-color: #2a2a2a;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-card .skeleton-button {
+  width: 100%;
+  height: 48px; /* Matches the new button height */
+  background-color: #2a2a2a;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation-delay: 0.2s;
+}
+
+.error, .empty-state {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.2rem;
+  color: #a0a0a0;
+  grid-column: 1 / -1; /* Span full width */
+}
+
+footer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border-color);
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.footer-button {
+  background-image: linear-gradient(45deg, var(--primary-color-darker), var(--primary-color));
+  color: var(--background-color);
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.footer-button:hover {
+  opacity: 0.9;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+  transform: translateY(-2px);
+}
+
+/* --- Media Queries for Responsiveness --- */
+
+@media (max-width: 992px) {
+  .prompt-gallery {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 2.8rem;
+  }
+
+  header p {
+    font-size: 1.1rem;
+  }
+
+  .prompt-gallery {
+    gap: 1.25rem;
+  }
+
+  .pagination-controls {
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  footer {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  #root {
+    padding: 2rem 0.75rem;
+  }
+
+  .container {
+    gap: 2rem;
+  }
+  
+  header h1 {
+    font-size: 2.2rem;
+  }
+  
+  header p {
+      font-size: 1rem;
+  }
+
+  .instructions {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .instructions p {
+    font-size: 0.9rem;
+  }
+  
+  .filters button {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .prompt-gallery {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .pagination-actions {
+      justify-content: center;
+      flex-wrap: wrap;
+  }
+  
+  .pagination-actions button {
+      width: 36px;
+      height: 36px;
+  }
+
+  .footer-button {
+    width: 100%;
+    max-width: 320px;
+  }
+}

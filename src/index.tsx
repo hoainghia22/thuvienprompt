@@ -1,7 +1,7 @@
-// Fix: Replaced invalid placeholder content with the main application code to resolve parsing errors.
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createRoot } from 'react-dom/client';
 import PocketBase from 'pocketbase';
+import './index.css';
 
 const POCKETBASE_URL = 'https://api.cafenho.site';
 const CATEGORIES = ["NAM", "NỮ", "COUPLE", "BÉ TRAI", "BÉ GÁI", "MẸ BẦU", "PROMPT KHÁC"];
@@ -47,7 +47,7 @@ const PromptCard: React.FC<{ record: PromptRecord }> = ({ record }) => {
     <div className="prompt-card">
       <img src={record.publishUrl} alt={`Prompt image for ${record.id}`} loading="lazy" />
       <div className="card-overlay">
-        <button onClick={handleCopy} className={copied ? 'copied' : ''}>
+        <button onClick={handleCopy} className={copied ? 'copied' : ''} aria-live="polite">
           {copied ? 'ĐÃ SAO CHÉP!' : 'SAO CHÉP PROMPT'}
         </button>
       </div>
@@ -181,7 +181,7 @@ const App = () => {
         <div className="instructions">
           <h3>HƯỚNG DẪN</h3>
           <p>
-            Sao chép prompt sau đó vào Gemini <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">(tại đây)</a>, chọn tạo hình ảnh, tải ảnh của bạn lên, upload ảnh mặt cá nhân và chép prompt để tạo ảnh.
+            Sao chép prompt, mở Gemini <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">tại đây</a>, sau đó tải ảnh của bạn lên và dán prompt để tạo ảnh.
           </p>
         </div>
       </header>
