@@ -134,6 +134,16 @@ header p {
   margin-bottom: 0;
 }
 
+main {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding-bottom: 6rem; /* Add space for the fixed footer */
+}
+
 .instructions a {
   color: var(--color-primary);
   text-decoration: none;
@@ -181,65 +191,14 @@ header p {
 }
 
 .filters button:active,
-.pagination-actions button:active,
 .footer-button:active {
     transform: scale(0.97);
 }
 
-
-.pagination-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  font-size: 0.9rem;
-  padding: 0 0.5rem;
-}
-
-.pagination-info {
-  color: var(--color-text-secondary);
-}
-
-.pagination-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.pagination-actions button {
-  background-color: var(--color-surface);
-  color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-  display: grid;
-  place-items: center;
-}
-
-.pagination-actions button:hover:not(:disabled) {
-  background-color: var(--color-surface-hover);
-  border-color: #555;
-}
-
-.pagination-actions button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.pagination-actions button.active {
-  background-color: var(--color-surface-hover);
-  font-weight: var(--font-weight-bold);
-  border-color: #666;
-}
-
 .prompt-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
 }
 
 .prompt-card {
@@ -336,7 +295,7 @@ header p {
   animation-delay: 0.2s;
 }
 
-.error, .empty-state {
+.error, .empty-state, .end-of-results {
   text-align: center;
   padding: 4rem;
   font-size: 1.2rem;
@@ -344,14 +303,31 @@ header p {
   grid-column: 1 / -1; /* Span full width */
 }
 
-footer {
+.end-of-results {
+  padding: 2rem 0;
+  font-size: 1rem;
+}
+
+.site-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
   width: 100%;
+  padding: 1rem 0;
+  background-color: var(--color-background);
+  border-top: 1px solid var(--color-border);
+  z-index: 100;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.footer-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto;
-  padding-top: 2rem;
-  border-top: 1px solid var(--color-border);
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1rem;
   font-size: 0.9rem;
   color: #888;
 }
@@ -392,7 +368,7 @@ footer {
 
 @media (max-width: 992px) {
   .prompt-gallery {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
 }
 
@@ -409,13 +385,11 @@ footer {
     gap: 1.25rem;
   }
 
-  .pagination-controls {
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
+  main {
+    padding-bottom: 10rem; /* More space for taller footer on mobile */
   }
 
-  footer {
+  .footer-content {
     flex-direction: column;
     gap: 1.5rem;
     text-align: center;
@@ -456,16 +430,6 @@ footer {
   .prompt-gallery {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
-  }
-  
-  .pagination-actions {
-      justify-content: center;
-      flex-wrap: wrap;
-  }
-  
-  .pagination-actions button {
-      width: 36px;
-      height: 36px;
   }
 
   .footer-button {

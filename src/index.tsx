@@ -5,7 +5,7 @@ import './index.css';
 
 const POCKETBASE_URL = 'https://api.cafenho.site';
 const CATEGORIES = ["NAM", "NỮ", "COUPLE", "BÉ TRAI", "BÉ GÁI", "MẸ BẦU", "PROMPT KHÁC"];
-const PAGE_SIZES = [10, 20, 50];
+const PROMPTS_PER_PAGE = 10;
 
 const pb = new PocketBase(POCKETBASE_URL);
 
@@ -68,118 +68,84 @@ const SkeletonCard = () => (
   </div>
 );
 
-const PaginationControls = ({
-  page,
-  totalPages,
-  totalItems,
-  perPage,
-  setPage,
-  setPerPage,
-}: {
-  page: number;
-  totalPages: number;
-  totalItems: number;
-  perPage: number;
-  setPage: (page: number) => void;
-  setPerPage: (size: number) => void;
-}) => {
-  if (totalPages <= 1) return null;
-  
-  const itemsOnPage =
-    page < totalPages ? perPage : totalItems - perPage * (totalPages - 1);
-  return (
-    <div className="pagination-controls">
-      <div className="pagination-info">
-        Trang {page} / {totalPages} | {itemsOnPage} Prompt trên trang
-      </div>
-      <div className="pagination-actions">
-        {PAGE_SIZES.map((size) => (
-          <button
-            key={size}
-            onClick={() => setPerPage(size)}
-            className={perPage === size ? 'active' : ''}
-            aria-label={`Hiển thị ${size} prompt mỗi trang`}
-            aria-pressed={perPage === size}
-          >
-            {size}
-          </button>
-        ))}
-        <button onClick={() => setPage(page - 1)} disabled={page <= 1} aria-label="Trang trước">
-          &lt;
-        </button>
-        <button onClick={() => setPage(page + 1)} disabled={page >= totalPages} aria-label="Trang tiếp theo">
-          &gt;
-        </button>
-      </div>
-    </div>
-  );
-};
-
 const App = () => {
   const [prompts, setPrompts] = useState<PromptRecord[]>([]);
   const [page, setPage] = useState(1);
-  const [perPage, setPerPage] = useState(20);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0]);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchPrompts = useCallback(async () => {
-    setLoading(true);
+  const fetchPrompts = useCallback(async (pageToFetch: number, category: string) => {
+    setIsLoading(true);
     setError(null);
     let requestAborted = false;
     try {
-      const filter = activeCategory ? `category = "${activeCategory}"` : '';
+      const filter = category ? `category = "${category}"` : '';
       const result = await pb
         .collection('prompt')
-        .getList<PromptRecord>(page, perPage, {
+        .getList<PromptRecord>(pageToFetch, PROMPTS_PER_PAGE, {
           filter: filter,
           sort: '-created',
         });
-      setPrompts(result.items);
-      setPage(result.page);
-      setPerPage(result.perPage);
-      setTotalPages(result.totalPages);
-      setTotalItems(result.totalItems);
+      setPrompts(prev => (pageToFetch === 1 ? result.items : [...prev, ...result.items]));
+      setHasMore(result.page < result.totalPages);
     } catch (err: any) {
       if (err && err.isAbort) {
         requestAborted = true;
-        console.log('Request was auto-cancelled.');
       } else {
         setError('Không thể tải dữ liệu. Vui lòng thử lại sau.');
         console.error(err);
       }
     } finally {
       if (!requestAborted) {
-        setLoading(false);
+        setIsLoading(false);
       }
     }
-  }, [page, perPage, activeCategory]);
+  }, []);
 
   useEffect(() => {
-    fetchPrompts();
-  }, [fetchPrompts]);
+    fetchPrompts(page, activeCategory);
+  }, [page, activeCategory, fetchPrompts]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (isLoading || !hasMore) return;
+      
+      const isAtBottom = window.innerHeight + document.documentElement.scrollTop >= document.documentElement.offsetHeight - 300;
+      
+      if (isAtBottom) {
+        setPage(prevPage => prevPage + 1);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [isLoading, hasMore]);
 
   useEffect(() => {
     const promise = pb.collection('prompt').subscribe('*', () => {
-      fetchPrompts();
+      setPrompts([]);
+      setHasMore(true);
+      if (page === 1) {
+        fetchPrompts(1, activeCategory);
+      } else {
+        setPage(1);
+      }
     });
 
     return () => {
       promise.then((unsubscribe) => unsubscribe());
     };
-  }, [fetchPrompts]);
+  }, [activeCategory, page, fetchPrompts]);
 
   const handleSetCategory = (category: string) => {
+    if (category === activeCategory) return;
+    setPrompts([]);
+    setHasMore(true);
     setPage(1);
     setActiveCategory(category);
   };
-
-  const handleSetPerPage = (size: number) => {
-    setPage(1);
-    setPerPage(size);
-  }
 
   return (
     <div className="container">
@@ -207,66 +173,54 @@ const App = () => {
             </button>
           ))}
         </div>
-        <PaginationControls
-          page={page}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          perPage={perPage}
-          setPage={setPage}
-          setPerPage={handleSetPerPage}
-        />
-        {loading && (
-          <div className="prompt-gallery" role="tabpanel">
-            {Array.from({ length: perPage }).map((_, index) => (
-              <SkeletonCard key={index} />
+        
+        {error && <div className="error" role="alert">{error}</div>}
+        
+        <div className="prompt-gallery" role="tabpanel">
+          {prompts.map((p) => (
+            <PromptCard key={p.id} record={p} />
+          ))}
+          {isLoading &&
+            (prompts.length === 0 ? Array.from({ length: PROMPTS_PER_PAGE }) : Array.from({ length: 3 })).map((_, index) => (
+              <SkeletonCard key={`skeleton-${index}`} />
             ))}
+        </div>
+
+        {!isLoading && prompts.length === 0 && !error && (
+          <div className="empty-state">
+            <p>Không tìm thấy prompt nào cho danh mục này.</p>
           </div>
         )}
-        {error && <div className="error" role="alert">{error}</div>}
-        {!loading && !error && (
-          <>
-            <div className="prompt-gallery" role="tabpanel">
-              {prompts.map((p) => (
-                <PromptCard key={p.id} record={p} />
-              ))}
-            </div>
-            {prompts.length === 0 && (
-              <div className="empty-state">
-                <p>Không tìm thấy prompt nào cho danh mục này.</p>
-              </div>
-            )}
-          </>
+
+        {!isLoading && !hasMore && prompts.length > 0 && (
+          <div className="end-of-results">
+            <p>Bạn đã xem hết tất cả các prompt.</p>
+          </div>
         )}
-        <PaginationControls
-          page={page}
-          totalPages={totalPages}
-          totalItems={totalItems}
-          perPage={perPage}
-          setPage={setPage}
-          setPerPage={handleSetPerPage}
-        />
       </main>
-      <footer>
-        <span>
-          Phát triển bởi{' '}
+      <footer className="site-footer">
+        <div className="footer-content">
+          <span>
+            Phát triển bởi{' '}
+            <a
+              href="#author-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              Hoài Nghĩa
+            </a>{' '}
+            | © {new Date().getFullYear()}
+          </span>
           <a
-            href="#author-link"
+            href="#feedback-link"
             target="_blank"
             rel="noopener noreferrer"
-            className="footer-link"
+            className="footer-button"
           >
-            Hoài Nghĩa
-          </a>{' '}
-          | © {new Date().getFullYear()}
-        </span>
-        <a
-          href="#feedback-link"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="footer-button"
-        >
-          Feedback
-        </a>
+            Feedback
+          </a>
+        </div>
       </footer>
     </div>
   );
