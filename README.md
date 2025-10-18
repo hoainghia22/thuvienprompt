@@ -2,7 +2,7 @@
 
 Chào mừng bạn đến với Thư Viện Prompt! Đây là một ứng dụng web hiện đại, được xây dựng bằng React và Vite, dùng để khám phá và sao chép các prompt tạo hình ảnh. Ứng dụng kết nối với PocketBase backend để hiển thị một bộ sưu tập các prompt được tuyển chọn theo thời gian thực.
 
-![Ảnh chụp màn hình ứng dụng Thư Viện Prompt](./screenshot.png) <!-- Nên thêm ảnh chụp màn hình của ứng dụng với tên screenshot.png vào thư mục gốc -->
+![Ảnh chụp màn hình ứng dụng Thư Viện Prompt](./screenshot.png)
 
 ## ✨ Tính Năng Nổi Bật
 
