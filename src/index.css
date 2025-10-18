@@ -145,7 +145,7 @@ header p {
 
 main {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -211,7 +211,7 @@ main {
 
 .prompt-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: 1.5rem;
 }
 
@@ -442,7 +442,7 @@ main {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 1rem;
   font-size: 0.9rem;
