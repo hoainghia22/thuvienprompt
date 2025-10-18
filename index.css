@@ -1,17 +1,20 @@
 :root {
   /* COLORS */
-  --color-primary: #e5b84b;
-  --color-primary-dark: #c79f3c;
-  --color-primary-light: #f0d89f;
-  --color-background: #121212;
-  --color-background-gradient: #1f1f1f;
+  --color-primary: #FDB813;
+  --color-primary-dark: #EAA800;
+  --color-primary-light: #FFD15B;
+  --color-glow: rgba(253, 184, 19, 0.25);
+  --color-background: #0D0D0D;
+  --color-background-gradient: #1a1a1a;
   --color-surface: #1e1e1e; /* For cards, buttons, etc. */
-  --color-surface-hover: #333;
-  --color-text-primary: #e0e0e0;
+  --color-surface-hover: #2a2a2a;
+  --color-text-primary: #f0f0f0;
   --color-text-secondary: #a0a0a0;
   --color-text-on-primary: #121212; /* Text on primary color background */
   --color-border: #2c2c2c;
   --color-skeleton: #2a2a2a;
+  --color-success: #28a745;
+  --surface-glass: rgba(40, 40, 40, 0.6);
 
   /* TYPOGRAPHY */
   --font-family-sans: 'Inter', sans-serif;
@@ -23,16 +26,18 @@
   /* SPACING & RADII */
   --radius-sm: 8px;
   --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-pill: 999px;
   
   /* TRANSITIONS & SHADOWS */
-  --transition-fast: 0.2s ease-in-out;
-  --transition-medium: 0.3s ease;
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-medium: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-image: 0.4s ease-in-out;
   --shadow-sm: 0 4px 10px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 10px 25px rgba(0, 0, 0, 0.5);
-  --shadow-primary-sm: 0 0 15px rgba(229, 184, 75, 0.3);
-  --shadow-primary-md: 0 7px 18px rgba(229, 184, 75, 0.25);
+  --shadow-primary-sm: 0 0 15px var(--color-glow);
+  --shadow-primary-md: 0 0 25px var(--color-glow);
+  --blur-md: 10px;
 }
 
 html {
@@ -53,11 +58,11 @@ html {
 @keyframes cardEnter {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.95) translateY(10px);
   }
   to {
     opacity: 1;
-    transform: scale(1);
+    transform: scale(1) translateY(0);
   }
 }
 
@@ -111,19 +116,19 @@ header p {
   font-size: 1.2rem;
   color: var(--color-text-secondary);
   margin-bottom: 2rem;
-  max-width: 600px;
+  max-width: 700px;
   margin-left: auto;
   margin-right: auto;
 }
 
 .instructions {
-  background-color: rgba(30, 30, 30, 0.5);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   padding: 1.5rem 2rem;
   max-width: 800px;
   margin: 0 auto;
-  text-align: left;
+  text-align: center;
 }
 
 .instructions h3 {
@@ -140,7 +145,7 @@ header p {
 
 main {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -169,20 +174,25 @@ main {
 }
 
 .filters button {
-  background-color: var(--color-surface);
+  background-color: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-md));
+  -webkit-backdrop-filter: blur(var(--blur-md));
   color: var(--color-text-primary);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 0.6rem 1.25rem;
   border-radius: var(--radius-pill);
   cursor: pointer;
   transition: all var(--transition-fast);
   font-weight: var(--font-weight-medium);
   font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .filters button:hover {
-  background-color: var(--color-surface-hover);
-  border-color: #555;
+  background-color: rgba(50, 50, 50, 0.7);
+  border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
 }
 
@@ -191,7 +201,7 @@ main {
   color: var(--color-text-on-primary);
   border-color: var(--color-primary);
   font-weight: var(--font-weight-bold);
-  box-shadow: var(--shadow-primary-sm);
+  box-shadow: var(--shadow-primary-md);
 }
 
 .filters button:active,
@@ -201,33 +211,61 @@ main {
 
 .prompt-gallery {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
   gap: 1.5rem;
 }
 
 .prompt-card {
   position: relative;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform var(--transition-medium), box-shadow var(--transition-medium);
+  transition: transform var(--transition-medium), box-shadow var(--transition-medium), border-color var(--transition-medium);
   animation: cardEnter 0.5s ease-out forwards;
+  border: 1px solid transparent;
 }
 
 .prompt-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: var(--shadow-primary-md);
+  border-color: var(--color-primary);
 }
 
-.prompt-card img {
+.prompt-card .image-container {
+  position: relative;
   width: 100%;
   aspect-ratio: 2 / 3;
+  background-color: var(--color-surface);
+  overflow: hidden; /* This clips the scaled images inside */
+  transition: transform var(--transition-medium);
+}
+
+.prompt-card:hover .image-container {
+  transform: scale(1.05);
+}
+
+.prompt-card .image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  display: block;
+}
+
+.prompt-card .placeholder-img {
+  filter: blur(10px);
+  /* The scale is to hide the blurry edges that can appear */
+  transform: scale(1.1);
+  z-index: 1;
+}
+
+.prompt-card .main-img {
   opacity: 0;
+  z-index: 2;
   transition: opacity var(--transition-image);
 }
 
-.prompt-card img.loaded {
+.prompt-card .main-img.loaded {
   opacity: 1;
 }
 
@@ -235,39 +273,75 @@ main {
   position: absolute;
   inset: 0;
   display: flex;
+  justify-content: flex-end;
   align-items: flex-end;
-  background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 50%);
-  opacity: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 60%);
+  padding: 0.75rem;
+  opacity: 1;
   transition: opacity var(--transition-medium);
 }
 
-.prompt-card:hover .card-overlay {
-  opacity: 1;
+.button-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.prompt-card button {
-  width: 100%;
-  padding: 0.85rem;
-  background: rgba(18, 18, 18, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+.copy-button {
+  background-color: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-md));
+  -webkit-backdrop-filter: blur(var(--blur-md));
   color: var(--color-text-primary);
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   font-weight: var(--font-weight-semibold);
   font-size: 0.9rem;
-  transform: translateY(100%);
-  transition: transform var(--transition-medium);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  transition: width var(--transition-medium), background-color var(--transition-medium), color var(--transition-medium);
 }
 
-.prompt-card:hover button {
-  transform: translateY(0);
+.prompt-card:hover .copy-button {
+  width: 175px;
 }
 
-.prompt-card button.copied {
+.copy-button .text {
+  opacity: 0;
+  transition: opacity 0.2s 0.1s ease;
+  white-space: nowrap;
+}
+
+.prompt-card:hover .copy-button .text {
+  opacity: 1;
+}
+
+.copy-button .icon {
+  flex-shrink: 0;
+}
+
+.copy-button svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
+
+.copy-button.copied {
   background-color: var(--color-primary);
   color: var(--color-text-on-primary);
+  width: 175px !important;
 }
+
+.copy-button.copied .text {
+  opacity: 1;
+}
+
 
 /* Skeleton Loader Styles with Shimmer Effect */
 @keyframes shimmer {
@@ -278,21 +352,13 @@ main {
 
 .skeleton-card {
   background-color: var(--color-surface);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  position: relative;
+  aspect-ratio: 2 / 3;
 }
 
-.skeleton-card .skeleton-image,
-.skeleton-card .skeleton-button {
-  background-color: var(--color-skeleton);
-  position: relative; /* Needed for the pseudo-element */
-  overflow: hidden;   /* Keeps the shimmer inside the element */
-}
-
-.skeleton-card .skeleton-image::after,
-.skeleton-card .skeleton-button::after {
+.skeleton-card::after {
   content: '';
   position: absolute;
   top: 0;
@@ -308,16 +374,6 @@ main {
   );
   transform: translateX(-100%);
   animation: shimmer 1.5s infinite;
-}
-
-.skeleton-card .skeleton-image {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-}
-
-.skeleton-card .skeleton-button {
-  width: 100%;
-  height: 48px; /* Matches the button height */
 }
 
 .error, .empty-state, .end-of-results {
@@ -361,6 +417,7 @@ main {
 
 .load-more-button:disabled {
   background-color: var(--color-surface-hover);
+  color: var(--color-text-secondary);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
@@ -372,8 +429,10 @@ main {
   left: 0;
   width: 100%;
   padding: 1rem 0;
-  background-color: var(--color-background);
-  border-top: 1px solid var(--color-border);
+  background-color: rgba(18, 18, 18, 0.75);
+  backdrop-filter: blur(var(--blur-md));
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 100;
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.25);
 }
@@ -383,7 +442,7 @@ main {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  max-width: 1280px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 1rem;
   font-size: 0.9rem;
@@ -422,13 +481,46 @@ main {
   filter: brightness(1.1);
 }
 
-/* --- Media Queries for Responsiveness --- */
-
-@media (max-width: 992px) {
-  .prompt-gallery {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  }
+.scroll-to-top-button {
+  position: fixed;
+  bottom: 5rem;
+  right: 1.5rem;
+  z-index: 101;
+  background-color: var(--surface-glass);
+  backdrop-filter: blur(var(--blur-md));
+  -webkit-backdrop-filter: blur(var(--blur-md));
+  color: var(--color-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity var(--transition-medium), transform var(--transition-medium), background-color var(--transition-fast);
 }
+
+.scroll-to-top-button.visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.scroll-to-top-button:hover {
+  background-color: rgba(60, 60, 60, 0.8);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.scroll-to-top-button:active {
+  transform: scale(0.95);
+}
+
+/* --- Media Queries for Responsiveness --- */
 
 @media (max-width: 768px) {
   header h1 {
@@ -440,7 +532,8 @@ main {
   }
 
   .prompt-gallery {
-    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1.15rem;
   }
 
   main {
@@ -451,6 +544,13 @@ main {
     flex-direction: column;
     gap: 1.5rem;
     text-align: center;
+  }
+
+  .scroll-to-top-button {
+    bottom: 7rem;
+    right: 1rem;
+    width: 44px;
+    height: 44px;
   }
 }
 
@@ -488,6 +588,15 @@ main {
   .prompt-gallery {
     grid-template-columns: repeat(2, 1fr);
     gap: 1rem;
+  }
+
+  .copy-button, .prompt-card:hover .copy-button, .copy-button.copied {
+    width: 40px;
+    height: 40px;
+  }
+
+  .copy-button .text {
+    display: none;
   }
 
   .footer-button {

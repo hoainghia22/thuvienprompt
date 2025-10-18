@@ -4,7 +4,15 @@ import PocketBase from 'pocketbase';
 import './index.css';
 
 const POCKETBASE_URL = 'https://api.cafenho.site';
-const CATEGORIES = ["NAM", "NỮ", "COUPLE", "BÉ TRAI", "BÉ GÁI", "MẸ BẦU", "PROMPT KHÁC"];
+const CATEGORIES = [
+  { name: "NAM", emoji: "👨" },
+  { name: "NỮ", emoji: "👩" },
+  { name: "COUPLE", emoji: "👫" },
+  { name: "BÉ TRAI", emoji: "👦" },
+  { name: "BÉ GÁI", emoji: "👧" },
+  { name: "MẸ BẦU", emoji: "🤰" },
+  { name: "PROMPT KHÁC", emoji: "✨" },
+];
 const PROMPTS_PER_PAGE = 10;
 
 const pb = new PocketBase(POCKETBASE_URL);
@@ -34,77 +42,104 @@ interface PromptRecord {
   publishUrl: string;
 }
 
+// --- SVG ICONS ---
+const CopyIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="20 6 9 17 4 12"></polyline>
+  </svg>
+);
+
+const ArrowUpIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="19" x2="12" y2="5"></line>
+    <polyline points="5 12 12 5 19 12"></polyline>
+  </svg>
+);
+
+
 // --- COMPONENTS ---
 const PromptCard: React.FC<{ record: PromptRecord }> = React.memo(({ record }) => {
   const [copied, setCopied] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const timeoutRef = useRef<number | null>(null);
+  const copyTimeoutRef = useRef<number | null>(null);
+
+  const thumbnailUrl = useMemo(() => `${record.publishUrl}?thumb=30x45`, [record.publishUrl]);
+  const mainImageUrl = useMemo(() => `${record.publishUrl}?thumb=400x600`, [record.publishUrl]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(record.prompt);
     setCopied(true);
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = window.setTimeout(() => {
-      setCopied(false);
-    }, 2000);
+    if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    copyTimeoutRef.current = window.setTimeout(() => setCopied(false), 2000);
   };
 
   useEffect(() => {
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
     };
   }, []);
 
   return (
     <div className="prompt-card">
-      <img
-        src={record.publishUrl}
-        alt={`Prompt image for ${record.id}`}
-        loading="lazy"
-        decoding="async"
-        onLoad={() => setImageLoaded(true)}
-        className={imageLoaded ? 'loaded' : ''}
-      />
+      <div className="image-container">
+        <img
+          src={thumbnailUrl}
+          className="placeholder-img"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          src={mainImageUrl}
+          alt={`Prompt image for ${record.id}`}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setImageLoaded(true)}
+          className={`main-img ${imageLoaded ? 'loaded' : ''}`}
+        />
+      </div>
       <div className="card-overlay">
-        <button onClick={handleCopy} className={copied ? 'copied' : ''} aria-live="polite">
-          {copied ? 'ĐÃ SAO CHÉP!' : 'SAO CHÉP PROMPT'}
-        </button>
+        <div className="button-group">
+          <button onClick={handleCopy} className={`copy-button ${copied ? 'copied' : ''}`} aria-live="polite">
+              <span className="icon">
+                {copied ? <CheckIcon /> : <CopyIcon />}
+              </span>
+              <span className="text">
+                {copied ? 'ĐÃ SAO CHÉP!' : 'SAO CHÉP PROMPT'}
+              </span>
+          </button>
+        </div>
       </div>
     </div>
   );
 });
 
-const SkeletonCard = () => (
-  <div className="skeleton-card">
-    <div className="skeleton-image" />
-    <div className="skeleton-button" />
-  </div>
-);
+const SkeletonCard = () => <div className="skeleton-card" />;
 
 const App = () => {
   const [prompts, setPrompts] = useState<PromptRecord[]>([]);
   const [page, setPage] = useState(1);
-  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0]);
+  const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].name);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  // FIX: Add a state to trigger refetching for real-time updates.
   const [refetchTrigger, setRefetchTrigger] = useState(0);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
-  // Data fetching logic, triggered by page or category changes
+  // Data fetching logic
   useEffect(() => {
-    // Abort previous request to prevent race conditions
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
     const fetchPrompts = async () => {
-      // The loading state is now set in the event handler for a more responsive UI
       try {
         const filter = activeCategory ? `category ~ "%${activeCategory}%"` : '';
         const result = await pb
@@ -115,7 +150,6 @@ const App = () => {
             signal: controller.signal,
           });
         
-        // Only update state if the request was not aborted
         if (!controller.signal.aborted) {
           setPrompts(prev => (page === 1 ? result.items : [...prev, ...result.items]));
           setHasMore(result.page < result.totalPages);
@@ -132,7 +166,6 @@ const App = () => {
           setHasMore(false);
         }
       } finally {
-        // Only stop loading if this request is the latest one
         if (!controller.signal.aborted) {
           setIsLoading(false);
         }
@@ -144,7 +177,6 @@ const App = () => {
     return () => {
       controller.abort();
     };
-    // FIX: Add refetchTrigger to dependency array to allow manual refetching.
   }, [page, activeCategory, refetchTrigger]);
 
   // Infinite scroll logic
@@ -165,15 +197,24 @@ const App = () => {
     return () => window.removeEventListener('scroll', throttledScrollHandler);
   }, [throttledScrollHandler]);
 
-  // Real-time subscription - runs only once
+  // Scroll handler for showing/hiding the "scroll to top" button
+  useEffect(() => {
+    const checkVisibility = () => {
+      setShowScrollButton(window.scrollY > 400);
+    };
+    const throttledCheckVisibility = throttle(checkVisibility, 200);
+    window.addEventListener('scroll', throttledCheckVisibility);
+    return () => {
+      window.removeEventListener('scroll', throttledCheckVisibility);
+    };
+  }, []);
+
+  // Real-time subscription
   useEffect(() => {
     const promise = pb.collection('prompt').subscribe('*', () => {
       if (page === 1) {
-         // If already on page 1, trigger a refetch for the current category
-        // FIX: The spread operator cannot be used on a string. Use a dedicated state to trigger the effect.
-        setRefetchTrigger(t => t + 1); // Force re-trigger of useEffect
+        setRefetchTrigger(t => t + 1);
       } else {
-        // Otherwise, reset to page 1 to show the newest data
         setPage(1);
       }
       setHasMore(true);
@@ -182,13 +223,12 @@ const App = () => {
     return () => {
       promise.then((unsubscribe) => unsubscribe());
     };
-  }, [page]); // Depend on page to correctly handle re-triggering
+  }, [page]);
 
-  const handleSetCategory = useCallback((category: string) => {
-    if (category === activeCategory) return;
+  const handleSetCategory = useCallback((categoryName: string) => {
+    if (categoryName === activeCategory) return;
     
-    // Set UI state synchronously for immediate feedback
-    setActiveCategory(category);
+    setActiveCategory(categoryName);
     setPage(1);
     setPrompts([]); 
     setHasMore(true); 
@@ -196,6 +236,10 @@ const App = () => {
     setError(null);
     window.scrollTo(0, 0);
   }, [activeCategory]);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   return (
     <div className="container">
@@ -205,7 +249,7 @@ const App = () => {
         <div className="instructions">
           <h3>HƯỚNG DẪN</h3>
           <p>
-            Sao chép prompt, mở Gemini <a href="https://gemini.google.com/app" target="_blank" rel="noopener noreferrer">tại đây</a>, sau đó tải ảnh của bạn lên và dán prompt để tạo ảnh.
+            Sao chép prompt, mở Gemini <a href="https://ai.studio/apps/drive/1RC8KRvWHTpLpzRA5ol0pQJXEmgqZNBJW" target="_blank" rel="noopener noreferrer">tại đây</a>, sau đó tải ảnh của bạn lên và dán prompt để tạo ảnh.
           </p>
         </div>
       </header>
@@ -213,13 +257,14 @@ const App = () => {
         <div className="filters" role="tablist" aria-label="Lọc theo danh mục">
           {CATEGORIES.map((cat) => (
             <button
-              key={cat}
+              key={cat.name}
               role="tab"
-              aria-selected={activeCategory === cat}
-              onClick={() => handleSetCategory(cat)}
-              className={activeCategory === cat ? 'active' : ''}
+              aria-selected={activeCategory === cat.name}
+              onClick={() => handleSetCategory(cat.name)}
+              className={activeCategory === cat.name ? 'active' : ''}
             >
-              {cat}
+              <span>{cat.emoji}</span>
+              {cat.name}
             </button>
           ))}
         </div>
@@ -265,7 +310,7 @@ const App = () => {
           <span>
             Phát triển bởi{' '}
             <a
-              href="https://github.com/hoainghia22"
+              href="https://www.facebook.com/hoai.nghia.truong.2025/"
               target="_blank"
               rel="noopener noreferrer"
               className="footer-link"
@@ -275,7 +320,7 @@ const App = () => {
             | © {new Date().getFullYear()}
           </span>
           <a
-            href="mailto:feedback.cafenho@gmail.com?subject=Feedback for Thư Viện Prompt"
+            href="https://t.me/hoainghia86"
             target="_blank"
             rel="noopener noreferrer"
             className="footer-button"
@@ -284,6 +329,14 @@ const App = () => {
           </a>
         </div>
       </footer>
+      <button 
+        onClick={scrollToTop} 
+        className={`scroll-to-top-button ${showScrollButton ? 'visible' : ''}`}
+        aria-label="Cuộn lên đầu trang"
+        tabIndex={showScrollButton ? 0 : -1}
+      >
+        <ArrowUpIcon />
+      </button>
     </div>
   );
 };
