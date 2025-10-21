@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { createRoot } from 'react-dom/client';
 import PocketBase from 'pocketbase';
 import './index.css';
+import { pb as defaultPb } from './pb'; // Import the default instance
 
-const POCKETBASE_URL = 'https://api.cafenho.site';
 const CATEGORIES = [
   { name: "NAM", emoji: "👨" },
   { name: "NỮ", emoji: "👩" },
@@ -14,8 +14,6 @@ const CATEGORIES = [
   { name: "PROMPT KHÁC", emoji: "✨" },
 ];
 const PROMPTS_PER_PAGE = 10;
-
-const pb = new PocketBase(POCKETBASE_URL);
 
 // --- UTILITY FUNCTIONS ---
 const throttle = (func: (...args: any[]) => void, delay: number) => {
@@ -40,6 +38,10 @@ interface PromptRecord {
   prompt: string;
   url: string;
   publishUrl: string;
+}
+
+interface AppProps {
+  pb?: PocketBase; // Make pb optional
 }
 
 // --- SVG ICONS ---
@@ -122,7 +124,7 @@ const PromptCard: React.FC<{ record: PromptRecord }> = React.memo(({ record }) =
 
 const SkeletonCard = () => <div className="skeleton-card" />;
 
-const App = () => {
+export const App: React.FC<AppProps> = ({ pb = defaultPb }) => {
   const [prompts, setPrompts] = useState<PromptRecord[]>([]);
   const [page, setPage] = useState(1);
   const [activeCategory, setActiveCategory] = useState(CATEGORIES[0].name);
@@ -177,7 +179,7 @@ const App = () => {
     return () => {
       controller.abort();
     };
-  }, [page, activeCategory, refetchTrigger]);
+  }, [page, activeCategory, refetchTrigger, pb]);
 
   // Infinite scroll logic
   const handleScroll = useCallback(() => {
@@ -212,18 +214,15 @@ const App = () => {
   // Real-time subscription
   useEffect(() => {
     const promise = pb.collection('prompt').subscribe('*', () => {
-      if (page === 1) {
-        setRefetchTrigger(t => t + 1);
-      } else {
-        setPage(1);
-      }
+      setPage(1);
       setHasMore(true);
+      setRefetchTrigger(t => t + 1);
     });
 
     return () => {
       promise.then((unsubscribe) => unsubscribe());
     };
-  }, [page]);
+  }, [pb]);
 
   const handleSetCategory = useCallback((categoryName: string) => {
     if (categoryName === activeCategory) return;
@@ -287,6 +286,7 @@ const App = () => {
               onClick={() => setPage(p => p + 1)} 
               className="load-more-button"
               disabled={isLoading}
+              data-testid="load-more-button"
             >
               {isLoading ? 'ĐANG TẢI...' : 'TẢI THÊM'}
             </button>
@@ -344,5 +344,5 @@ const App = () => {
 const container = document.getElementById('root');
 if (container) {
   const root = createRoot(container);
-  root.render(<App />);
+  root.render(<App pb={defaultPb} />);
 }
